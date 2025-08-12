@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h1>Welcome to RefurbTrack</h1>
+    <p class="lead">Manage, refurbish, and sell inventory — all in one place.</p>
+    <div class="mt-4">
+        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">Create Account</a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg">Login</a>
+    </div>
+    {% if current_user.is_authenticated and current_user.role == "Admin" %}
+    <div class="mt-4">
+        <a href="{{ url_for('create_company') }}" class="btn btn-success btn-lg">Create Company</a>
+    </div>
+    {% endif %}
+    <div class="mt-5">
+        <h2>Features</h2>
+        <ul class="list-unstyled">
+            <li><strong>Inventory Management:</strong> Track items, refurbishments, and sales.</li>
+            <li><strong>Refurbishment Tracking:</strong> Monitor refurbishment status and history.</li>
+            <li><strong>Sales Management:</strong> Manage sales and customer interactions.</li>
+            <li><strong>Analytics:</strong> Gain insights into inventory performance.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

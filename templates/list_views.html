@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Items</h3>
+<form class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input name="q" value="{{ q }}" placeholder="search model/serial/buyer" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <select name="status" class="form-select">
+      <option value="">All statuses</option>
+      {% for s in ['Received','Needs Repair','In Repair','Ready for Sale','Sold','Shipped'] %}
+        <option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-primary">Filter</button>
+  </div>
+  {% if status == "Shipped" %}
+  <form method="POST" action="{{ url_for('compress_shipped') }}">
+      <button class="btn btn-danger mb-3">Compress Shipped Items Older Than 30 Days</button>
+  </form>
+  {% endif %}
+  <div class="col-md-3">
+    <a class="btn btn-success" href="{{ url_for('add_item') }}">Add New Item</a>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead><tr><th>Model</th><th>Serial</th><th>Status</th><th>Location</th><th>Ship By</th><th></th></tr></thead>
+  <tbody>
+    {% for it in items %}
+      <tr>
+        <td><a href="{{ url_for('view_item', item_id=it.id) }}">{{ it.model }}</a></td>
+        <td>{{ it.serial }}</td>
+        <td>{{ it.status }}</td>
+        <td>{{ it.location }}</td>
+        <td>{{ it.ship_by or '' }}</td>
+        <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('qr', item_id=it.id) }}">QR</a></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

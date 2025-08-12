@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Sign Up</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label>Username</label>
+        <input name="username" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <input name="email" type="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input name="password" type="password" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Role</label>
+        <select name="role" id="roleSelect" class="form-control" required>
+            <option value="Stocker">Stocker</option>
+            <option value="Repair-Tech">Repair-Tech</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+    <div class="mb-3" id="joinCodeField">
+        <label>Company Join Code</label>
+        <input name="join_code" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Sign Up</button>
+</form>
+
+<script>
+document.getElementById("roleSelect").addEventListener("change", function() {
+    const joinCodeField = document.getElementById("joinCodeField");
+    joinCodeField.style.display = (this.value === "Admin") ? "none" : "block";
+});
+</script>
+{% endblock %}

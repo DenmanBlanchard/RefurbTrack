@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>{{ item.model }} <small class="text-muted">{{ item.serial }}</small></h4>
+                <img src="{{ qr_url }}" alt="QR Code" width="100">
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr><th>Status</th><td>
+                        <select id="statusDropdown" class="form-select" style="width:auto;display:inline-block;">
+                            {% for s in ['Received','Needs Repair','In Repair','Ready for Sale','Sold','Shipped'] %}
+                                <option value="{{ s }}" {% if item.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="soldExtraFields" style="display:none;" class="mt-2">
+                            <input type="date" id="shipByInput" class="form-control mb-1" placeholder="Ship By Date">
+                            <textarea id="addressInput" class="form-control" placeholder="Buyer Address"></textarea>
+                        </div>
+                    </td></tr>
+                    <tr><th>Location</th><td>{{ item.location }}</td></tr>
+                    <tr><th>Buyer</th><td>{{ item.buyer_name }} / {{ item.buyer_order }}</td></tr>
+                    <tr><th>Buyer Address</th><td>{{ item.buyer_address or '-' }}</td></tr>
+                    <tr><th>Ship By</th><td>{{ item.ship_by or '-' }}</td></tr>
+                    <tr><th>Notes</th><td>{{ item.notes or '-' }}</td></tr>
+                    <tr><th>Created</th><td>{{ item.created_at }}</td></tr>
+                    <tr><th>Updated</th><td>{{ item.updated_at }}</td></tr>
+                    {% if item.specs_url %}
+                    <tr><th>Specs</th><td><a href="{{ item.specs_url }}" target="_blank" class="btn btn-outline-info btn-sm">View Specs</a></td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><strong>Activity Log</strong></div>
+            <ul class="list-group list-group-flush">
+                {% for log in logs %}
+                    <li class="list-group-item">
+                        <small class="text-muted">{{ log.timestamp }}</small><br>
+                        {{ log.actor }}: {{ log.action }}
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">No activity yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if item.photo_filename %}
+            <div class="card">
+                <img src="{{ url_for('uploaded_file', filename=item.photo_filename) }}" class="card-img-top" alt="Item photo">
+            </div>
+        {% endif %}
+    </div>
+    <hr>
+    <h3>Danger Zone</h3>
+    <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item? This cannot be undone.')">
+        <div class="mb-2">
+            <label>Type the item name (<strong>{{ item.model }}</strong>) to confirm:</label>
+            <input type="text" name="confirm_name" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-danger">Delete Item</button>
+    </form>
+</div>
+
+<script>
+const dropdown = document.getElementById("statusDropdown");
+const soldFields = document.getElementById("soldExtraFields");
+
+dropdown.addEventListener("change", function() {
+    if (this.value === "Sold") {
+        soldFields.style.display = "block";
+    } else {
+        soldFields.style.display = "none";
+        // Auto-save status immediately for non-Sold
+        fetch("", {
+            method: "POST",
+            body: new URLSearchParams({status: this.value}),
+            headers: {"Content-Type": "application/x-www-form-urlencoded"}
+        }).then(() => location.reload());
+    }
+});
+
+// Save with extra fields when Sold is chosen
+document.getElementById("shipByInput")?.addEventListener("change", saveSold);
+document.getElementById("addressInput")?.addEventListener("blur", saveSold);
+
+function saveSold() {
+    if (dropdown.value === "Sold") {
+        const shipBy = document.getElementById("shipByInput").value;
+        const address = document.getElementById("addressInput").value;
+        if (shipBy && address) {
+            fetch("", {
+                method: "POST",
+                body: new URLSearchParams({
+                    status: "Sold",
+                    ship_by: shipBy,
+                    buyer_address: address
+                }),
+                headers: {"Content-Type": "application/x-www-form-urlencoded"}
+            }).then(() => location.reload());
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Edit Item</h3>
+<form method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+  <div>{{ form.model.label }} {{ form.model(class_="form-control") }}</div>
+  <div>{{ form.serial.label }} {{ form.serial(class_="form-control") }}</div>
+  <div>{{ form.notes.label }} {{ form.notes(class_="form-control", rows=3) }}</div>
+  <div>{{ form.status.label }} {{ form.status(class_="form-select") }}</div>
+  <div>{{ form.location.label }} {{ form.location(class_="form-control") }}</div>
+  <div>{{ form.photo.label }} {{ form.photo(class_="form-control") }}</div>
+  <hr>
+  <div>{{ form.buyer_name.label }} {{ form.buyer_name(class_="form-control") }}</div>
+  <div>{{ form.buyer_order.label }} {{ form.buyer_order(class_="form-control") }}</div>
+  <div>{{ form.ship_by.label }} {{ form.ship_by(class_="form-control") }}</div>
+  <button class="btn btn-primary mt-2">Save</button>
+</form>
+{% endblock %}
