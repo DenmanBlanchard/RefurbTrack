@@ -1,53 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Refurb Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-  </head>
 
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
-      <div class="container">
-        <a class="navbar-brand" href="{{ url_for('index') }}">Refurb Tracker</a>
-        {% if current_user.is_authenticated %}
-        <div class="navbar-nav ms-auto">
-          <span class="navbar-text text-light me-3"
-            >Welcome, {{ current_user.username }}</span
-          >
-          <a class="nav-link" href="{{ url_for('add_item') }}">+ Add Item</a>
-          <a class="nav-link" href="{{ url_for('items') }}">All Items</a>
-          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-          {% if current_user.role == 'Admin' %}
-          <a class="nav-link" href="{{ url_for('company_info') }}"
-            >Company Info</a
-          >
-          {% endif %}
-        </div>
-        {% else %}
-        <div class="navbar-nav ms-auto">
-          <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-          <a class="nav-link" href="{{ url_for('signup') }}">Register</a>
-        </div>
+<head>
+  <meta charset="utf-8" />
+  <title>Refurb Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .shrink-center {
+      animation: shrinkCenter 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    @keyframes shrinkCenter {
+      0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.3) translateY(0);
+      }
+    }
+
+    .swipe-in-right {
+      animation: swipeInRight 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      position: relative;
+      z-index: 11;
+      height: 100vh;
+      width: 100vw;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .swipe-card-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.25);
+      z-index: 10;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .swipe-card {
+      background: #fff;
+      border-radius: 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+      padding: 2rem 2.5rem;
+      width: 100vw;
+      height: 100vh;
+      overflow-y: auto;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes swipeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(600px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Edit Item Modal Overlay -->
+  <div id="editItemModal" class="swipe-card-overlay" style="display:none;">
+    <div class="swipe-card swipe-in-right" id="editItemCard">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Edit Item</h3>
+        <button type="button" class="btn btn-outline-secondary" id="editItemExit">&times;</button>
+      </div>
+      <div id="editItemFormContainer">
+        <!-- Form will be loaded here via AJAX -->
+      </div>
+    </div>
+  </div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">Refurb Tracker</a>
+      {% if current_user.is_authenticated %}
+      <div class="navbar-nav ms-auto">
+        <span class="navbar-text text-light me-3">Welcome, {{ current_user.username }}</span>
+        <a class="nav-link" href="#" id="addItemBtn">+ Add Item</a>
+        <a class="nav-link" href="{{ url_for('items') }}">All Items</a>
+        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        {% if current_user.role == 'Admin' %}
+        <a class="nav-link" href="{{ url_for('company_info') }}">Company Info</a>
         {% endif %}
       </div>
-    </nav>
-
-    <div class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for cat, msg in messages %}
-      <div
-        class="alert alert-{{ 'success' if cat=='success' else 'info' }} alert-dismissible"
-      >
-        {{ msg }} <button class="btn-close" data-bs-dismiss="alert"></button>
+      {% else %}
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+        <a class="nav-link" href="{{ url_for('signup') }}">Register</a>
       </div>
-      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+      {% endif %}
     </div>
+  </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  <!-- Add Item Modal Overlay -->
+  <div id="addItemModal" class="swipe-card-overlay" style="display:none;">
+    <div class="swipe-card swipe-in-right" id="addItemCard">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Add Item</h3>
+        <button type="button" class="btn btn-outline-secondary" id="addItemExit">&times;</button>
+      </div>
+      <div id="addItemFormContainer">
+        <!-- Form will be loaded here via AJAX -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for cat, msg in messages %}
+    <div class="alert alert-{{ 'success' if cat=='success' else 'info' }} alert-dismissible">
+      {{ msg }} <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Open Edit Item Modal
+    document.querySelectorAll('[data-edit-item]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var itemId = btn.getAttribute('data-edit-item');
+        var modal = document.getElementById('editItemModal');
+        var card = document.getElementById('editItemCard');
+        card.classList.remove('shrink-center');
+        card.classList.add('swipe-in-right');
+        modal.style.display = 'flex';
+        // Load form via AJAX
+        fetch(`/item/${itemId}/edit?modal=1`)
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById('editItemFormContainer').innerHTML = html;
+          });
+      });
+    });
+
+    // Exit Edit Item Modal with shrink animation
+    document.getElementById('editItemExit')?.addEventListener('click', function () {
+      var card = document.getElementById('editItemCard');
+      card.classList.remove('swipe-in-right');
+      card.classList.add('shrink-center');
+      setTimeout(function () {
+        document.getElementById('editItemModal').style.display = 'none';
+      }, 400);
+    });
+  </script>
+  <script>
+    // Open Add Item Modal
+    document.getElementById('addItemBtn')?.addEventListener('click', function (e) {
+      e.preventDefault();
+      var modal = document.getElementById('addItemModal');
+      var card = document.getElementById('addItemCard');
+      card.classList.remove('shrink-center');
+      card.classList.add('swipe-in-right');
+      modal.style.display = 'flex';
+      // Load form via AJAX
+      fetch("{{ url_for('add_item') }}?modal=1")
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('addItemFormContainer').innerHTML = html;
+        });
+    });
+
+    // Exit Add Item Modal with shrink animation
+    document.getElementById('addItemExit')?.addEventListener('click', function () {
+      var card = document.getElementById('addItemCard');
+      card.classList.remove('swipe-in-right');
+      card.classList.add('shrink-center');
+      setTimeout(function () {
+        document.getElementById('addItemModal').style.display = 'none';
+      }, 400);
+    });
+  </script>
+</body>
+
 </html>

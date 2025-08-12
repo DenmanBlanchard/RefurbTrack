@@ -258,7 +258,9 @@ def create_app():
             db.session.commit()
             flash("Item created", "success")
             return redirect(url_for("view_item", item_id=item.id))
-        return render_template("add_item.html", form=form)
+        if request.args.get("modal") == "1":
+            return render_template("add_item.html", form=form)
+        return render_template("base.html", form=form)
 
     @app.route("/item/<item_id>", methods=["GET", "POST"])
     @login_required
@@ -352,7 +354,9 @@ def create_app():
             db.session.commit()
             flash("Item updated", "success")
             return redirect(url_for("view_item", item_id=item.id))
-        return render_template("edit_item.html", form=form, item=item)
+        if request.args.get("modal") == "1":
+            return render_template("edit_item.html", form=form, item=item)
+        return render_template("base.html", form=form, item=item)
 
     @app.route("/item/<item_id>/log", methods=["POST"])
     @login_required

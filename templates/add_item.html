@@ -1,44 +1,40 @@
-{% extends "base.html" %}
-{% block content %}
-<h3>Add Item</h3>
-<form method="post" enctype="multipart/form-data">
-  {{ form.hidden_tag() }}
-  <div class="mb-2">{{ form.model.label }} {{ form.model(class_="form-control") }}</div>
-  <div class="mb-2">{{ form.serial.label }} {{ form.serial(class_="form-control") }}</div>
-  <div class="mb-2">{{ form.notes.label }} {{ form.notes(class_="form-control", rows=3) }}</div>
-  <div class="mb-2">{{ form.status.label }} {{ form.status(class_="form-select") }}</div>
-  <div class="mb-2">{{ form.location.label }} {{ form.location(class_="form-control") }}</div>
-  <div class="mb-2">{{ form.photo.label }} {{ form.photo(class_="form-control") }}</div>
-  <hr>
-  <h6>Sale info (optional)</h6>
-  <div class="mb-2">{{ form.buyer_name.label }} {{ form.buyer_name(class_="form-control") }}</div>
-  <div class="mb-2">{{ form.buyer_order.label }} {{ form.buyer_order(class_="form-control") }}</div>
-  <div class="mb-2">{{ form.ship_by.label }} {{ form.ship_by(class_="form-control") }} <small class="text-muted">YYYY-MM-DD</small></div>
-  <div class="mb-2">
-    {{ form.specs_url.label }} 
-    {{ form.specs_url(class_="form-control", id="specsUrlInput") }}
-    <small class="text-muted">
-        Suggested: <a href="#" id="specsSuggestion" target="_blank">None</a>
-    </small>
-</div>
-
-<script>
-document.getElementById("model").addEventListener("input", function() {
-    const model = this.value.trim();
-    const suggestion = document.getElementById("specsSuggestion");
-    if (model.length > 2) {
-        const url = "https://www.gsmarena.com/res.php3?sSearch=" + encodeURIComponent(model);
-        suggestion.href = url;
-        suggestion.textContent = url;
-        // Auto-fill specs_url field with GSMArena search link
-        document.getElementById("specsUrlInput").value = url;
-    } else {
-        suggestion.href = "#";
-        suggestion.textContent = "None";
-    }
-});
-</script>
-
-  <button class="btn btn-primary">Create</button>
+<form method="post" enctype="multipart/form-data" id="addItemForm">
+    {{ form.hidden_tag() }}
+    <div class="mb-2">{{ form.model.label }} {{ form.model(class_="form-control", id="model") }}</div>
+    <div class="mb-2">{{ form.serial.label }} {{ form.serial(class_="form-control") }}</div>
+    <div class="mb-2">{{ form.notes.label }} {{ form.notes(class_="form-control", rows=3) }}</div>
+    <div class="mb-2">{{ form.status.label }} {{ form.status(class_="form-select") }}</div>
+    <div class="mb-2">{{ form.location.label }} {{ form.location(class_="form-control") }}</div>
+    <div class="mb-2">{{ form.photo.label }} {{ form.photo(class_="form-control") }}</div>
+    <hr>
+    <h6>Sale info (optional)</h6>
+    <div class="mb-2">{{ form.buyer_name.label }} {{ form.buyer_name(class_="form-control") }}</div>
+    <div class="mb-2">{{ form.buyer_order.label }} {{ form.buyer_order(class_="form-control") }}</div>
+    <div class="mb-2">{{ form.ship_by.label }} {{ form.ship_by(class_="form-control") }} <small
+            class="text-muted">YYYY-MM-DD</small></div>
+    <div class="mb-2">
+        {{ form.specs_url.label }}
+        {{ form.specs_url(class_="form-control", id="specsUrlInput") }}
+        <small class="text-muted">
+            Suggested: <a href="#" id="specsSuggestion" target="_blank">None</a>
+        </small>
+    </div>
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
 </form>
-{% endblock %}
+<script>
+    document.getElementById("model").addEventListener("input", function () {
+        const model = this.value.trim();
+        const suggestion = document.getElementById("specsSuggestion");
+        if (model.length > 2) {
+            const url = "https://www.gsmarena.com/res.php3?sSearch=" + encodeURIComponent(model);
+            suggestion.href = url;
+            suggestion.textContent = url;
+            document.getElementById("specsUrlInput").value = url;
+        } else {
+            suggestion.href = "#";
+            suggestion.textContent = "None";
+        }
+    });
+</script>
