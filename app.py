@@ -387,7 +387,14 @@ def create_app():
     @login_required
     @require_company
     def uploaded_file(filename):
-        return send_file(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        # Sanitize filename and construct full path
+        base_path = app.config["UPLOAD_FOLDER"]
+        safe_filename = secure_filename(filename)
+        fullpath = os.path.normpath(os.path.join(base_path, safe_filename))
+        # Ensure the file is within the upload folder
+        if not fullpath.startswith(os.path.abspath(base_path)):
+            abort(403)
+        return send_file(fullpath)
 
     return app
 
